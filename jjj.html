@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEM - Hóa Học & Toán Học</title>
+    <style>
+        :root {
+            --candy-pink: #ff85a2;
+            --candy-blue: #7bd5f5;
+            --candy-purple: #b794f4;
+            --night-dark: #0b0e1a;
+            --success-green: #48bb78;
+            --error-red: #f56565;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+        }
+
+        #canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 0;
+        }
+
+        #main-ui {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .main-title {
+            font-size: 3.5rem;
+            color: var(--candy-pink);
+            text-shadow: 0 0 20px var(--candy-pink), 2px 2px 10px #000;
+            margin-bottom: 50px;
+            text-align: center;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .menu-nav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .btn-candy {
+            padding: 15px 30px;
+            border: 3px solid var(--candy-blue);
+            background: rgba(123, 213, 245, 0.1);
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+            font-size: 1.1rem;
+        }
+
+        .btn-candy:hover {
+            background: var(--candy-blue);
+            box-shadow: 0 0 20px var(--candy-blue);
+            color: var(--night-dark);
+        }
+
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            width: 90%;
+            max-width: 800px;
+            height: 85%;
+            background: rgba(15, 15, 25, 0.98);
+            border: 4px solid var(--candy-purple);
+            border-radius: 30px;
+            z-index: 100;
+            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            padding: 30px;
+            box-sizing: border-box;
+            display: none;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: block;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .back-home {
+            position: sticky;
+            top: 0;
+            float: right;
+            background: var(--candy-pink);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+            z-index: 110;
+        }
+
+        /* Member Styles */
+        .circle-container {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 40px auto;
+            border-radius: 50%;
+            border: 2px dashed var(--candy-blue);
+        }
+
+        .member-sector {
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.5s;
+            cursor: pointer;
+            text-align: center;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .s1 { top: 0; left: 0; background: rgba(255, 133, 162, 0.3); border-radius: 160px 0 0 0; }
+        .s2 { top: 0; left: 160px; background: rgba(123, 213, 245, 0.3); border-radius: 0 160px 0 0; }
+        .s3 { top: 160px; left: 0; background: rgba(183, 148, 244, 0.3); border-radius: 0 0 0 160px; }
+        .s4 { top: 160px; left: 160px; background: rgba(255, 247, 0, 0.2); border-radius: 0 0 160px 0; }
+
+        .member-sector.selected {
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 10;
+            background: var(--night-dark);
+            border: 3px solid var(--candy-pink);
+            border-radius: 50%;
+            transform: rotate(360deg);
+        }
+
+        .info { display: none; pointer-events: none; }
+        .selected .info { display: block; animation: fadeIn 0.8s; }
+        .selected .name-tag { display: none; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Quiz Styles */
+        .quiz-box {
+            text-align: center;
+            padding-top: 20px;
+        }
+
+        .ans-btn {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            margin: 10px 0;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid var(--candy-blue);
+            color: white;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1rem;
+            text-align: left;
+            transition: 0.2s;
+        }
+
+        .ans-btn:hover { background: rgba(123, 213, 245, 0.2); }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #222;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--candy-pink);
+            width: 0%;
+            transition: 0.5s;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div id="main-ui">
+    <h1 class="main-title">STEM<br><span style="font-size: 1.5rem; color: var(--candy-blue); letter-spacing: 5px;">12A1</span></h1>
+    <div class="menu-nav">
+        <button class="btn-candy" onclick="openModal('modal-member')">Thành viên nhóm</button>
+        <button class="btn-candy" onclick="openQuiz('nguyen-ham')">Toán học</button>
+        <button class="btn-candy" onclick="openQuiz('hoa-hoc')">Hóa học </button>
+    </div>
+</div>
+
+<div id="modal-member" class="modal">
+    <button class="back-home" onclick="closeModal('modal-member')">Đóng</button>
+    <h2 style="text-align: center; color: var(--candy-pink); margin-top: 40px;">Thành viên </h2>
+    <div class="circle-container" id="circle">
+        <div class="member-sector s1" onclick="focusMember(this)">
+            <span class="name-tag">ADMIN 1</span>
+            <div class="info">
+                <h3>Hoàng Gia Bảo Hân</h3>
+                <p>Lớp: 12A1</p>
+                <p>Giới tính : nữ</p>     
+            </div>
+        </div>
+        <div class="member-sector s2" onclick="focusMember(this)">
+            <span class="name-tag">ADMIN 2</span>
+            <div class="info">
+                <h3>Phạm Văn Toàn</h3>
+                <p>Lớp: 12A1</p>
+                <p>Giới tính : nam</p>
+            </div>
+        </div>
+        <div class="member-sector s3" onclick="focusMember(this)">
+            <span class="name-tag">ADMIN 3</span>
+            <div class="info">
+                <h3>Đặng Văn Phong</h3>
+                <p>Lớp: 12A1</p>
+                <p>Giới tính : nam</p>
+            </div>
+        </div>
+        <div class="member-sector s4" onclick="focusMember(this)">
+            <span class="name-tag">ADMIN 4</span>
+            <div class="info">
+                <h3>Lê Nguyễn Tiến Thuận</h3>
+                <p>Lớp: 12A1</p>
+                <p>Giới tính : nam</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-quiz" class="modal">
+    <button class="back-home" onclick="closeModal('modal-quiz')">Thoát</button>
+    <div class="quiz-box">
+        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+        <h2 id="q-title" style="color: var(--candy-blue);">Câu hỏi</h2>
+        <p id="q-text" style="font-size: 1.1rem; margin-bottom: 25px; line-height: 1.5; text-align: left;"></p>
+        <div id="ans-list"></div>
+    </div>
+</div>
+<script>
+    // --- Particles Effect ---
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function initCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    class Particle {
+        constructor() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2 + 0.5;
+            this.speedX = Math.random() * 0.5 - 0.25;
+            this.speedY = Math.random() * 0.5 - 0.25;
+            this.color = `hsl(${Math.random() * 60 + 200}, 70%, 80%)`;
+        }
+        update() {
+            this.x += this.speedX;
+            this.y += this.speedY;
+            if (this.x > canvas.width) this.x = 0;
+            if (this.x < 0) this.x = canvas.width;
+            if (this.y > canvas.height) this.y = 0;
+            if (this.y < 0) this.y = canvas.height;
+        }
+        draw() {
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    function createParticles() {
+        particles = [];
+        for (let i = 0; i < 150; i++) particles.push(new Particle());
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
+        requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', () => { initCanvas(); createParticles(); });
+    initCanvas();
+    createParticles();
+    animate();
+
+    // --- Modal Logic ---
+    function openModal(id) {
+        document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+        document.getElementById(id).classList.remove('active');
+    }
+
+    function focusMember(el) {
+        if (el.classList.contains('selected')) {
+            el.classList.remove('selected');
+        } else {
+            document.querySelectorAll('.member-sector').forEach(s => s.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+    }
+
+    // --- Quiz Data & Logic ---
+    const dataMath = [
+        { q: "Câu 1. Trong các khẳng định sau, khẳng định nào mô tả đúng và đầy đủ nhất về định nghĩa nguyên hàm?", a: ["Hàm số F(x) được gọi là một nguyên hàm của hàm số f(x) trên K nếu đạo hàm của f(x) bằng F(x) với mọi x thuộc K.", "Hàm số F(x) được gọi là một nguyên hàm của hàm số f(x) trên K nếu F(x) = f(x) với mọi x thuộc K.", "Hàm số F(x) được gọi là một nguyên hàm của hàm số f(x) trên K nếu đạo hàm của F(x) bằng f(x) với mọi x thuộc K.", "Hàm số F(x) được gọi là một nguyên hàm của hàm số f(x) trên K nếu đạo hàm của F(x) bằng f(x) với một vài giá trị x thuộc K."], c: 2 },
+        { q: "Câu 2. Họ nguyên hàm của hàm số f(x) = 0 là gì?", a: ["0", "x + C", "C (hằng số)", "1"], c: 2 },
+        { q: "Câu 3. Họ nguyên hàm của hàm số f(x) = 1 là gì?", a: ["x + C", "1", "C", "0"], c: 0 },
+        { q: "Câu 4. Tìm họ nguyên hàm của f(x) = x.", a: ["1 + C", "x² + C", "(1/2)x² + C", "(1/2)x + C"], c: 2 },
+        { q: "Câu 5. Tìm họ nguyên hàm của f(x) = 1/√x với x > 0.", a: ["2√x + C", "(1/2)√x + C", "-1/(2x√x) + C", "ln(√x) + C"], c: 0 },
+        { q: "Câu 6. Tìm họ nguyên hàm của f(x) = cos(x).", a: ["sin(x) + C", "-sin(x) + C", "cos(x) + C", "-cos(x) + C"], c: 0 },
+        { q: "Câu 7. Tìm họ nguyên hàm của f(x) = 1/sin²x trên các khoảng xác định của nó.", a: ["tan(x) + C", "-tan(x) + C", "cot(x) + C", "-cot(x) + C"], c: 3 },
+        { q: "Câu 8. Tìm họ nguyên hàm của f(x) = 2^x.", a: ["2^x.ln(2) + C", "2^x + C", "2^x / ln(2) + C", "x.2^(x-1) + C"], c: 2 },
+        { q: "Câu 9. Tính chất ∫[f(x) – g(x)]dx = ∫f(x)dx – ∫g(x)dx được suy ra từ tính chất nào của đạo hàm?", a: ["Đạo hàm của một tổng/hiệu.", "Đạo hàm của một tích.", "Đạo hàm của một thương.", "Quy tắc chuỗi (đạo hàm hàm hợp)."], c: 0 },
+        { q: "Câu 10. Nếu F(x) là một nguyên hàm của hàm số f(x) trên một khoảng K và C là một hằng số tùy ý, thì mối quan hệ giữa G(x) = F(x) + C và f(x) là gì?", a: ["G(x) cũng là một nguyên hàm của f(x) trên K vì đạo hàm của G(x) bằng đạo hàm của F(x) cộng C, tức là f(x) + C.", "G(x) không phải là một nguyên hàm của f(x) vì có sự xuất hiện của hằng số C.", "G(x) cũng là một nguyên hàm của f(x) trên K vì đạo hàm của hằng số C bằng 0.", "G(x) chỉ là một nguyên hàm của f(x) khi C = 0."], c: 2 },
+        { q: "Câu 11. Xét hàm số f(x) = 3x². Hàm số F(x) = x³ là một nguyên hàm của f(x). Đâu là cách diễn đạt đúng về tập hợp tất cả các nguyên hàm của f(x)?", a: ["Họ nguyên hàm của f(x) là x³.", "Họ nguyên hàm của f(x) là ∫3x²dx = x³ + C, với C là hằng số.", "Họ nguyên hàm của f(x) là 3x³ + C, với C là hằng số.", "Không tồn tại khái niệm họ nguyên hàm, chỉ có một nguyên hàm duy nhất."], c: 1 },
+        { q: "Câu 12. Phát biểu nào sau đây là đúng?", a: ["Hai nguyên hàm bất kỳ của cùng một hàm số thì bằng nhau.", "Hai nguyên hàm bất kỳ của cùng một hàm số có thể sai khác nhau một lượng tùy ý.", "Hai nguyên hàm bất kỳ của cùng một hàm số chỉ sai khác nhau một hằng số.", "Một hàm số chỉ có duy nhất một nguyên hàm."], c: 2 },
+        { q: "Câu 13. Cho F(x) và G(x) đều là các nguyên hàm của hàm số f(x) trên K. Mối quan hệ giữa đồ thị của y = F(x) và y = G(x) là gì?", a: ["Chúng là hai đường cong đối xứng nhau qua trục Ox.", "Chúng là hai đường cong có thể thu được bằng cách tịnh tiến lẫn nhau theo phương của trục Oy.", "Chúng trùng nhau hoàn toàn.", "Chúng là hai đường cong không liên quan."], c: 1 },
+        { q: "Câu 14. Dựa vào định nghĩa, đẳng thức nào sau đây luôn đúng?", a: ["∫(đạo hàm của f(x))dx = (đạo hàm của f(x)) + C", "∫f(x)dx = (đạo hàm của f(x)) + C", "Đạo hàm của (∫f(x)dx) bằng f(x).", "Đạo hàm của (∫f(x)dx) bằng f(x) + C."], c: 2 },
+        { q: "Câu 15. Khẳng định nào sau đây là sai về tính chất của nguyên hàm?", a: ["∫[f(x) + g(x)]dx = ∫f(x)dx + ∫g(x)dx", "∫k.f(x)dx = k.∫f(x)dx (với k là hằng số khác 0)", "∫[f(x).g(x)]dx = [∫f(x)dx].[∫g(x)dx]", "Mọi hàm số liên tục trên K đều có nguyên hàm trên K."], c: 2 },
+        { q: "Câu 16. Biểu thức f(x)dx trong ∫f(x)dx được gọi là gì và nó bằng với biểu thức nào sau đây nếu F(x) là một nguyên hàm của f(x)?", a: ["Vi phân của f(x), bằng (đạo hàm của f(x))dx.", "Vi phân của F(x), bằng (đạo hàm của F(x))dx.", "Tích phân của f(x).", "Đạo hàm của F(x)."], c: 1 },
+        { q: "Câu 17. Cho ∫f(x)dx = 2x² + sin(x) + C. Hàm số f(x) là hàm số nào dưới đây?", a: ["f(x) = 4x – cos(x)", "f(x) = 4x + cos(x)", "f(x) = (2/3)x³ – cos(x)", "f(x) = 2x + sin(x)"], c: 1 },
+        { q: "Câu 18. Nếu ∫f(x)dx = F(x) + C thì ∫f(2x)dx bằng:", a: ["F(2x) + C", "2F(2x) + C", "(1/2)F(2x) + C", "2F(x) + C"], c: 2 },
+        { q: "Câu 19. Tìm họ nguyên hàm F(x) của hàm số f(x) = (x+1)².", a: ["F(x) = (1/3)(x+1)³ + C", "F(x) = 2(x+1) + C", "F(x) = x³ + x² + x + C", "F(x) = (1/3)x³ + x² + x + C"], c: 0 },
+        { q: "Câu 20. Tìm một nguyên hàm F(x) của hàm số f(x) = e^x + 2 biết rằng F(0) = 3.", a: ["F(x) = e^x + 2x + 2", "F(x) = e^x + 2x + 3", "F(x) = e^x + 2", "F(x) = e^x + 3"], c: 0 },
+        { q: "Câu 21. Tìm nguyên hàm của f(x) = 1/cos²x biết đồ thị của nó đi qua điểm M(π/4, 3).", a: ["tan(x) + 2", "tan(x) + 3", "-cot(x) + 4", "tan(x)"], c: 0 },
+        { q: "Câu 22. Tìm nguyên hàm F(x) của f(x) = 1/x biết F(1) = 2.", a: ["F(x) = ln|x| + 1", "F(x) = ln(x) + 2", "F(x) = ln|x| + 2", "F(x) = -1/x² + 3"], c: 2 },
+        { q: "Câu 23. Một vật thể chuyển động với gia tốc a(t) = 12t (m/s²). Biết rằng tại thời điểm t=1 s, vận tốc của vật là v(1) = 10 m/s. Hàm số biểu thị vận tốc v(t) của vật là gì?", a: ["v(t) = 12t² + C", "v(t) = 6t² + 4", "v(t) = 6t² + 10", "v(t) = 12"], c: 1 },
+        { q: "Câu 24. Một chiếc ô tô đang chạy thì hãm phanh, chuyển động chậm dần với vận tốc v(t) = 20 – 4t (m/s), trong đó t là thời gian tính bằng giây kể từ lúc hãm phanh. Quãng đường ô tô đi được từ lúc hãm phanh đến khi dừng hẳn là bao nhiêu?", a: ["40 m", "50 m", "20 m", "100 m"], c: 1 },
+        { q: "Câu 25. Tìm họ nguyên hàm của hàm số f(x) = 2sin(x/2)cos(x/2).", a: ["-cos(x) + C", "sin(x) + C", "-cos(2x) + C", "2sin²(x/2) + C"], c: 0 },
+        { q: "Câu 26. Tại sao khi tìm nguyên hàm của f(x) = 1/x trên tập xác định R\\{0}, ta phải viết kết quả là ln|x| + C thay vì ln(x) + C?", a: ["Vì ln|x| có đạo hàm là 1/x trên cả hai khoảng (-∞, 0) và (0, +∞).", "Vì ln(x) chỉ xác định với x > 0, trong khi f(x) còn xác định với x < 0.", "Đây chỉ là quy ước để bài toán đơn giản hơn.", "Cả A và B đều là những lý do quan trọng."], c: 3 },
+        { q: "Câu 27. Cho hai hàm số F(x) và G(x) sao cho đạo hàm của F(x) bằng đạo hàm của G(x) với mọi x thuộc K. Kết luận nào sau đây là chính xác nhất?", a: ["F(x) = G(x) trên K.", "F(x) – G(x) = C (với C là hằng số) trên K.", "Đồ thị y = F(x) song song với đồ thị y = G(x).", "∫F(x)dx = ∫G(x)dx."], c: 1 },
+        { q: "Câu 28. Cho F(x) là một nguyên hàm của f(x) trên R. Nếu f(x) > 0 với mọi x thuộc R thì ta có thể kết luận gì về hàm số F(x)?", a: ["F(x) là hàm đồng biến trên R.", "F(x) là hàm nghịch biến trên R.", "F(x) là hàm hằng.", "F(x) luôn dương trên R."], c: 0 },
+        { q: "Câu 29. Cho hàm số F(x) là một nguyên hàm của f(x) trên K. Nếu f(x) là hàm số lẻ thì F(x) có tính chất gì?", a: ["F(x) là hàm số lẻ.", "F(x) là hàm số chẵn.", "F(x) là hàm số không chẵn, không lẻ.", "Không đủ thông tin để kết luận."], c: 1 },
+        { q: "Câu 30. Xét hai hàm số f(x) = 1/x trên khoảng (0, +∞) và g(x) = 1/x trên khoảng (-∞, 0).", a: ["ln(x) là nguyên hàm của f(x) và ln(-x) là nguyên hàm của g(x).", "ln|x| là nguyên hàm chung cho cả hai trường hợp.", "f(x) có nguyên hàm nhưng g(x) không có nguyên hàm.", "Cả A và B đều đúng."], c: 3 }
+    ];
+
+    const dataChem = [
+        { q: "Câu 1: Este đơn chức X có tỉ khối hơi so với CH4 là 6,25. Cho 20 gam X tác dụng với 300 ml dung dịch KOH 1M. Cô cạn thu được 28 gam chất rắn khan. CTCT của X là:", a: ["CH3-CH2-COO-CH=CH2", "CH2=CH-COO-CH2-CH3", "CH2=CH-CH2-COO-CH3", "CH3-COO-CH=CH-CH3"], c: 3 },
+        { q: "Câu 2: Ứng với công thức C4H8O2 có bao nhiêu este là đồng phân của nhau?", a: ["2", "3", "4", "5"], c: 2 },
+        { q: "Câu 3: Este có mùi dứa là:", a: ["isoamyl axetat", "etyl butirat", "etyl axetat", "geranyl axctat"], c: 1 },
+        { q: "Câu 4: Este X có CTPT C8H8O2. Tác dụng với NaOH thu được sản phẩm có hai muối. Số CTCT của X thỏa mãn là:", a: ["6", "3", "4", "5"], c: 2 },
+        { q: "Câu 5: Đun nóng este HCOOCH3 với một lượng vừa đủ dung dịch NaOH, sản phẩm thu được là:", a: ["CH3COONa và C2H5OH", "HCOONa và CH3OH", "HCOONa và C2H5OH", "CH3COONa và CH3OH"], c: 1 },
+        { q: "Câu 6: Thủy phân X, Y (đồng phân) cần 100ml NaOH 1M, thu được 7,64g muối và 3,76g hỗn hợp ancol Z, T. % khối lượng Z trong P là:", a: ["51%", "49%", "66%", "34%"], c: 3 },
+        { q: "Câu 7: Đốt cháy hoàn toàn muối từ este no, đơn chức X thu được 15,9g Na2CO3, 2,24l CO2 và 6,3g H2O. X là:", a: ["CH3COOH (Lưu ý: X là este)", "C2H5COOCH3", "C3H7COOCH3", "CH3COOC2H5"], c: 3 },
+        { q: "Câu 8: Thủy phân C4H6O2 trong kiềm thu được muối M và chất N đều tráng gương được. CTCT của E là:", a: ["CH3COOCH=CH2", "HCOOCH=CH-CH3", "CH2=CH-COOCH3", "HCOOCH2-CH=CH2"], c: 1 },
+        { q: "Câu 9: Chỉ số xà phòng hóa mẫu chất béo là 208,77 và chỉ số axit là 7. Axit chứa trong chất béo là:", a: ["Axit stearic", "Axit linoleic", "Axit oleic", "Axit panmitic"], c: 3 },
+        { q: "Câu 10: Xà phòng hoá chất nào sau đây thu được glixerol?", a: ["tristearin", "metyl axetat", "metyl fomat", "benzyl axetat"], c: 0 },
+        { q: "Câu 11: Triolein không phản ứng với chất nào sau đây?", a: ["H2 (xt)", "Dung dịch NaOH", "Dung dịch Br2", "Cu(OH)2"], c: 3 },
+        { q: "Câu 12: Xà phòng hóa C10H14O6 thu được glixerol và 3 muối (không đồng phân hình học). CT của 3 muối là:", a: ["CH2=CH-COONa, CH3CH2COONa, HCOONa", "HCOONa, CH≡C-COONa, CH3CH2COONa", "CH2=CH-COONa, HCOONa, CH≡C-COONa", "CH3COONa, HCOONa, CH3CH=CHCOONa"], c: 0 },
+        { q: "Câu 13: Phát biểu nào sau đây là sai?", a: ["Chất béo thường tan trong nước và nhẹ hơn nước", "Fructozơ có nhiều trong mật ong", "Metyl acrylat, tripanmitin là este", "Thủy phân chất béo luôn thu được glixerol"], c: 0 },
+        { q: "Câu 14: Đốt 1 mol chất béo thu được CO2 và H2O hơn kém 6 mol. a mol chất béo tác dụng tối đa 600ml Br2 1M. a là:", a: ["0,20", "0,15", "0,30", "0,18"], c: 1 },
+        { q: "Câu 15: Đốt a mol X (trieste) có b-c=4a. Hidro hóa m gam X cần 0,3 mol H2 thu 39g Y. Giá trị m2 chất rắn là:", a: ["57,2", "52,6", "53,2", "42,6"], c: 1 },
+        { q: "Câu 16: Chất nào sau đây có phân tử khối lớn nhất?", a: ["triolein", "tripanmitin", "tristearin", "trilinolein"], c: 0 },
+        { q: "Câu 17: Số phát biểu đúng: (1) Giặt trong nước cứng (2) Triglixerit + H2 (3) Thủy phân kiềm 1 chiều (4) Phân biệt Gly, HCOOH, Triolein", a: ["1", "2", "3", "4"], c: 2 },
+        { q: "Câu 18: Chất giặt rửa tổng hợp có ưu điểm:", a: ["Dễ kiếm", "Rẻ hơn xà phòng", "Dùng được trong nước cứng", "Hòa tan tốt trong nước"], c: 2 },
+        { q: "Câu 19: Thủy phân X được Y và Z. Oxi hóa Y tạo Z. X không thể là:", a: ["etyl axetat", "etylen glicol oxalat", "vinyl axetat", "isopropyl propionat"], c: 2 },
+        { q: "Câu 20: Chọn khái niệm đúng nhất về chất giặt rửa:", a: ["Sản xuất từ tinh bột", "Làm sạch vết bẩn trên vật rắn", "Làm sạch khi dùng với nước", "Làm sạch vết bẩn mà không gây pứ hóa học với chất đó"], c: 3 },
+        { q: "Câu 21: Đun 4,45 kg tristearin (20% tạp chất) với NaOH. Khối lượng glixerol (kg) là:", a: ["0,46", "0,45", "0,4", "0,3"], c: 2 },
+        { q: "Câu 22: Mỡ chứa 50% olein, 30% panmitin, 20% stearin. Khối lượng xà phòng từ 100kg mỡ là:", a: ["103,26 kg", "73,34 kg", "146,68 kg", "143,41 kg"], c: 0 },
+        { q: "Câu 23: Số phát biểu KHÔNG đúng về Este, Chất béo, Xà phòng, Ancol:", a: ["4", "3", "2", "1"], c: 2 },
+        { q: "Câu 24: Nguyên nhân bồ kết có khả năng giặt rửa:", a: ["Chất khử mạnh", "Este của glixerol", "Chất oxi hóa mạnh", "Cấu tạo đầu phân cực và đuôi không phân cực"], c: 3 },
+        { q: "Câu 25: Đốt 0,9g gluxit X thu 1,32g CO2 và 0,54g H2O. X là:", a: ["glucozơ", "saccarozơ", "tinh bột", "xenlulozơ"], c: 0 },
+        { q: "Câu 26: 50ml glucozơ + AgNO3/NH3 dư -> 2,16g Ag. CM glucozơ là:", a: ["0,20M", "0,01M", "0,02M", "0,1M"], c: 0 },
+        { q: "Câu 27: m gam (Glu + Fruc) + 0,2 mol H2. m gam hh + 0,05 mol Br2. Số mol Glu và Fruc là:", a: ["0,05 và 0,15", "0,05 và 0,35", "0,1 và 0,15", "0,2 và 0,2"], c: 0 },
+        { q: "Câu 28: 27g Glucozo tráng bạc, Ag + HNO3 đặc nóng. Khối lượng dd axit tăng a gam là:", a: ["18,6", "32,4", "16,2", "9,3"], c: 0 },
+        { q: "Câu 29: Phản ứng nào sau đây KHÔNG tạo ra glucozơ:", a: ["Lục hợp HCHO (Ca(OH)2)", "Tam hợp CH3CHO", "Thủy phân mantozơ", "Thủy phân saccarozơ"], c: 1 },
+        { q: "Câu 30: Lượng glucozơ cần tạo 1,82g sobitol (H=80%) là:", a: ["2,25 gam", "1,80 gam", "1,82 gam", "1,44 gam"], c: 0 }
+    ];
+
+    let currentQuestions = [];
+    let currentIdx = 0;
+    let score = 0;
+
+    function openQuiz(type) {
+        if(type === 'nguyen-ham') currentQuestions = dataMath;
+        else currentQuestions = dataChem;
+        
+        currentIdx = 0;
+        score = 0;
+        openModal('modal-quiz');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        const qText = document.getElementById('q-text');
+        const ansList = document.getElementById('ans-list');
+        const qTitle = document.getElementById('q-title');
+        const progress = document.getElementById('progress-fill');
+
+        if(currentIdx >= currentQuestions.length) {
+            qTitle.innerText = "HOÀN THÀNH";
+            qText.innerHTML = `<div style="text-align:center">Bạn đã hoàn thành bộ câu hỏi!<br><br>
+                               <span style="font-size:3rem; color:var(--candy-pink)">${score}/${currentQuestions.length}</span><br>câu trả lời đúng</div>`;
+            ansList.innerHTML = `<button class="btn-candy" style="width:100%" onclick="currentIdx=0;score=0;loadQuestion()">Làm lại bài này</button>`;
+            progress.style.width = "100%";
+            return;
+        }
+
+        const data = currentQuestions[currentIdx];
+        qTitle.innerText = `Câu hỏi ${currentIdx + 1} / ${currentQuestions.length}`;
+        qText.innerText = data.q;
+        ansList.innerHTML = "";
+        progress.style.width = `${(currentIdx / currentQuestions.length) * 100}%`;
+
+        data.a.forEach((txt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'ans-btn';
+            btn.innerHTML = `<span style="color:var(--candy-pink); font-weight:bold">${String.fromCharCode(65 + i)}.</span> ${txt}`;
+            btn.onclick = () => checkAnswer(i, btn);
+            ansList.appendChild(btn);
+        });
+    }
+
+    function checkAnswer(idx, btn) {
+        const correctIdx = currentQuestions[currentIdx].c;
+        const allBtns = document.querySelectorAll('.ans-btn');
+        
+        allBtns.forEach(b => b.style.pointerEvents = 'none');
+
+        if(idx === correctIdx) {
+            btn.style.background = 'var(--success-green)';
+            btn.style.borderColor = 'var(--success-green)';
+            score++;
+        } else {
+            btn.style.background = 'var(--error-red)';
+            btn.style.borderColor = 'var(--error-red)';
+            allBtns[correctIdx].style.background = 'var(--success-green)';
+            allBtns[correctIdx].style.borderColor = 'var(--success-green)';
+        }
+
+        setTimeout(() => {
+            currentIdx++;
+            loadQuestion();
+        }, 1500);
+    }
+</script>
+</body>
+</html>
