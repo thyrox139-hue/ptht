@@ -3,474 +3,341 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STEM - Hóa Học & Toán Học</title>
+    <title>STEM 12A1 - Professional Quiz</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <style>
         :root {
             --candy-pink: #ff85a2;
             --candy-blue: #7bd5f5;
             --candy-purple: #b794f4;
+            --candy-yellow: #fff76d;
             --night-dark: #0b0e1a;
-            --success-green: #48bb78;
-            --error-red: #f56565;
+            --soft-bg: rgba(27, 39, 53, 0.9);
         }
-
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            overflow: hidden;
+            height: 100%; overflow: hidden;
             background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: white;
+            font-family: 'Segoe UI', sans-serif; color: white;
         }
-
-        #canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 0;
-        }
-
+        
+        #canvas { position: fixed; top: 0; left: 0; z-index: 0; pointer-events: none; }
+        
         #main-ui {
-            position: relative;
-            z-index: 10;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+            position: relative; z-index: 10; min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
 
         .main-title {
-            font-size: 3.5rem;
-            color: var(--candy-pink);
-            text-shadow: 0 0 20px var(--candy-pink), 2px 2px 10px #000;
-            margin-bottom: 50px;
-            text-align: center;
-            animation: float 3s ease-in-out infinite;
+            font-size: 4rem; font-weight: 900; color: var(--candy-pink);
+            text-shadow: 0 0 20px var(--candy-pink); margin-bottom: 40px;
+            animation: float 4s ease-in-out infinite;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-15px); }
-        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
-        .menu-nav {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 20px;
-        }
-
+        .menu-nav { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 600px; }
+        
         .btn-candy {
-            padding: 15px 30px;
-            border: 3px solid var(--candy-blue);
-            background: rgba(123, 213, 245, 0.1);
-            color: white;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
-            backdrop-filter: blur(5px);
-            font-size: 1.1rem;
+            padding: 20px 40px; border: 3px solid var(--candy-blue);
+            background: rgba(123, 213, 245, 0.1); color: white;
+            border-radius: 50px; cursor: pointer; font-weight: 700; font-size: 1.2rem;
+            transition: all 0.3s ease; backdrop-filter: blur(10px);
         }
+.back-system-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1000;
+    padding: 12px 25px;
+    background: rgba(183, 148, 244, 0.2);
+    border: 2px solid var(--candy-purple);
+    color: white;
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 0 15px rgba(183, 148, 244, 0.3);
+}
 
-        .btn-candy:hover {
-            background: var(--candy-blue);
-            box-shadow: 0 0 20px var(--candy-blue);
-            color: var(--night-dark);
-        }
+.back-system-btn:hover {
+    background: var(--candy-purple);
+    color: var(--night-dark);
+    box-shadow: 0 0 25px var(--candy-purple);
+    transform: translateX(5px);
+}
+        .btn-candy:hover { background: var(--candy-blue); color: var(--night-dark); transform: scale(1.05); }
 
         .modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            width: 90%;
-            max-width: 800px;
-            height: 85%;
-            background: rgba(15, 15, 25, 0.98);
-            border: 4px solid var(--candy-purple);
-            border-radius: 30px;
-            z-index: 100;
-            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            padding: 30px;
-            box-sizing: border-box;
-            display: none;
-            overflow-y: auto;
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.8);
+            width: 90%; max-width: 900px; max-height: 85vh;
+            background: rgba(10, 15, 30, 0.98); border: 4px solid var(--candy-purple);
+            border-radius: 30px; z-index: 100; padding: 40px; display: none; overflow-y: auto;
+            box-shadow: 0 0 50px rgba(183, 148, 244, 0.4);
         }
 
-        .modal.active {
-            display: block;
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        .back-home {
-            position: sticky;
-            top: 0;
-            float: right;
-            background: var(--candy-pink);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 15px;
-            cursor: pointer;
-            color: white;
-            font-weight: bold;
-            z-index: 110;
-        }
-
-        /* Member Styles */
-        .circle-container {
-            position: relative;
-            width: 320px;
-            height: 320px;
-            margin: 40px auto;
-            border-radius: 50%;
-            border: 2px dashed var(--candy-blue);
-        }
-
-        .member-sector {
-            position: absolute;
-            width: 160px;
-            height: 160px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.5s;
-            cursor: pointer;
-            text-align: center;
-            padding: 15px;
-            box-sizing: border-box;
-        }
-
-        .s1 { top: 0; left: 0; background: rgba(255, 133, 162, 0.3); border-radius: 160px 0 0 0; }
-        .s2 { top: 0; left: 160px; background: rgba(123, 213, 245, 0.3); border-radius: 0 160px 0 0; }
-        .s3 { top: 160px; left: 0; background: rgba(183, 148, 244, 0.3); border-radius: 0 0 0 160px; }
-        .s4 { top: 160px; left: 160px; background: rgba(255, 247, 0, 0.2); border-radius: 0 0 160px 0; }
-
-        .member-sector.selected {
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: 10;
-            background: var(--night-dark);
-            border: 3px solid var(--candy-pink);
-            border-radius: 50%;
-            transform: rotate(360deg);
-        }
-
-        .info { display: none; pointer-events: none; }
-        .selected .info { display: block; animation: fadeIn 0.8s; }
-        .selected .name-tag { display: none; }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-        /* Quiz Styles */
-        .quiz-box {
-            text-align: center;
-            padding-top: 20px;
-        }
+        .modal.active { display: block; transform: translate(-50%, -50%) scale(1); transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
         .ans-btn {
-            display: block;
-            width: 100%;
-            padding: 12px 20px;
-            margin: 10px 0;
-            background: rgba(255,255,255,0.05);
-            border: 2px solid var(--candy-blue);
-            color: white;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 1rem;
-            text-align: left;
-            transition: 0.2s;
+            display: block; width: 100%; padding: 18px; margin: 12px 0;
+            background: rgba(255,255,255,0.05); border: 2px solid rgba(123, 213, 245, 0.4);
+            color: white; border-radius: 15px; text-align: left; cursor: pointer;
+            font-size: 1.15rem; transition: 0.2s;
         }
 
-        .ans-btn:hover { background: rgba(123, 213, 245, 0.2); }
+        .ans-btn:hover { border-color: var(--candy-blue); background: rgba(123, 213, 245, 0.15); }
+        .ans-btn.correct { background: #48bb78 !important; border-color: #48bb78; }
+        .ans-btn.wrong { background: #f56565 !important; border-color: #f56565; }
 
-        .progress-bar {
-            width: 100%;
-            height: 10px;
-            background: #222;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--candy-pink);
-            width: 0%;
-            transition: 0.5s;
-            border-radius: 5px;
-        }
+        .progress-bar { width: 100%; height: 8px; background: #222; border-radius: 10px; margin-bottom: 20px; }
+        .progress-fill { height: 100%; background: var(--candy-pink); width: 0%; transition: 0.4s; border-radius: 10px; }
+        
+        .close-btn { float: right; background: var(--candy-pink); border: none; padding: 10px 20px; color: white; border-radius: 15px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
-
-<canvas id="canvas"></canvas>
-
-<div id="main-ui">
-    <h1 class="main-title">STEM<br><span style="font-size: 1.5rem; color: var(--candy-blue); letter-spacing: 5px;">12A1</span></h1>
-    <div class="menu-nav">
-        <button class="btn-candy" onclick="openModal('modal-member')">Thành viên nhóm</button>
-        <button class="btn-candy" onclick="openQuiz('nguyen-ham')">Toán học</button>
-        <button class="btn-candy" onclick="openQuiz('hoa-hoc')">Hóa học </button>
-		<button class="btn-candy"><a href="https://thyrox139-hue.github.io/ptht2/jio.html">Quay lại</a></button>
-    </div>
-</div>
-
-<div id="modal-member" class="modal">
-    <button class="back-home" onclick="closeModal('modal-member')">Đóng</button>
-    <h2 style="text-align: center; color: var(--candy-pink); margin-top: 40px;">Thành viên </h2>
-    <div class="circle-container" id="circle">
-        <div class="member-sector s1" onclick="focusMember(this)">
-            <span class="name-tag">ADMIN 1</span>
-            <div class="info">
-                <h3>Hoàng Gia Bảo Hân</h3>
-                <p>Lớp: 12A1</p>
-                <p>Giới tính : nữ</p>     
-            </div>
-        </div>
-        <div class="member-sector s2" onclick="focusMember(this)">
-            <span class="name-tag">ADMIN 2</span>
-            <div class="info">
-                <h3>Phạm Văn Toàn</h3>
-                <p>Lớp: 12A1</p>
-                <p>Giới tính : nam</p>
-            </div>
-        </div>
-        <div class="member-sector s3" onclick="focusMember(this)">
-            <span class="name-tag">ADMIN 3</span>
-            <div class="info">
-                <h3>Đặng Văn Phong</h3>
-                <p>Lớp: 12A1</p>
-                <p>Giới tính : nam</p>
-            </div>
-        </div>
-        <div class="member-sector s4" onclick="focusMember(this)">
-            <span class="name-tag">ADMIN 4</span>
-            <div class="info">
-                <h3>Lê Nguyễn Tiến Thuận</h3>
-                <p>Lớp: 12A1</p>
-                <p>Giới tính : nam</p>
-            </div>
+<a href="https://thyrox139-hue.github.io/ptht2/jio.html" class="back-system-btn">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+    QUAY LẠI
+</a>
+    <canvas id="canvas"></canvas>
+    
+    <div id="main-ui">
+        <h1 class="main-title">CÂU HỎI TRẮC NGHIỆM</h1>
+        <div class="menu-nav">
+            <button class="btn-candy" onclick="startQuiz('toan')">📐 TOÁN</button>
+            <button class="btn-candy" onclick="startQuiz('hoa')">🧪 HÓA</button>
+            <button class="btn-candy" onclick="startQuiz('ly')">⚡ LÝ</button>
+            <button class="btn-candy" onclick="startQuiz('tin')">💻 TIN</button>
         </div>
     </div>
-</div>
 
-<div id="modal-quiz" class="modal">
-    <button class="back-home" onclick="closeModal('modal-quiz')">Thoát</button>
-    <div class="quiz-box">
-        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
-        <h2 id="q-title" style="color: var(--candy-blue);">Câu hỏi</h2>
-        <p id="q-text" style="font-size: 1.1rem; margin-bottom: 25px; line-height: 1.5; text-align: left;"></p>
-        <div id="ans-list"></div>
+    <div id="quiz-modal" class="modal">
+        <button class="close-btn" onclick="closeModal()">✕ THOÁT</button>
+        <div class="progress-bar"><div id="progress" class="progress-fill"></div></div>
+        <h3 id="q-count" style="color: var(--candy-blue); margin-bottom: 10px;"></h3>
+        <div id="q-text" style="font-size: 1.4rem; margin-bottom: 30px; line-height: 1.6;"></div>
+        <div id="ans-container"></div>
     </div>
-</div>
-<script>
-    // --- Particles Effect ---
-    const canvas = document.getElementById('canvas');
-    const ctx = canvas.getContext('2d');
-    let particles = [];
 
-    function initCanvas() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-
-    class Particle {
-        constructor() {
-            this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height;
-            this.size = Math.random() * 2 + 0.5;
-            this.speedX = Math.random() * 0.5 - 0.25;
-            this.speedY = Math.random() * 0.5 - 0.25;
-            this.color = `hsl(${Math.random() * 60 + 200}, 70%, 80%)`;
+    <script>
+        // Hiệu ứng hạt nền
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let parts = [];
+        function init() { 
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight; 
+            parts = Array.from({length: 100}, () => ({
+                x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+                s: Math.random()*2, vx: Math.random()*0.5-0.25, vy: Math.random()*0.5-0.25
+            }));
         }
-        update() {
-            this.x += this.speedX;
-            this.y += this.speedY;
-            if (this.x > canvas.width) this.x = 0;
-            if (this.x < 0) this.x = canvas.width;
-            if (this.y > canvas.height) this.y = 0;
-            if (this.y < 0) this.y = canvas.height;
+        function draw() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = "white";
+            parts.forEach(p => {
+                p.x += p.vx; p.y += p.vy;
+                if(p.x<0 || p.x>canvas.width) p.vx*=-1;
+                if(p.y<0 || p.y>canvas.height) p.vy*=-1;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI*2); ctx.fill();
+            });
+            requestAnimationFrame(draw);
         }
-        draw() {
-            ctx.fillStyle = this.color;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    }
+        init(); draw();
 
-    function createParticles() {
-        particles = [];
-        for (let i = 0; i < 150; i++) particles.push(new Particle());
-    }
+        // KHO DỮ LIỆU 120 CÂU HỎI DẠNG LATEX
+        const quizData = {
+            toan: [
+                { q: "Nguyên hàm của hàm số \\( f(x) = x^n \\) (với \\( n \\neq -1 \\)) là:", a: ["\\( x^{n+1} + C \\)", "\\( n.x^{n-1} + C \\)", "\\( \\frac{x^{n+1}}{n+1} + C \\)", "\\( \\frac{x^n}{n} + C \\)"], c: 2 },
+                { q: "Tính tích phân \\( I = \\int_{0}^{1} x dx \\):", a: ["1", "\\( \\frac{1}{2} \\)", "2", "0"], c: 1 },
+                { q: "Họ nguyên hàm của hàm số \\( f(x) = \\cos x \\) là:", a: ["\\( -\\sin x + C \\)", "\\( \\sin x + C \\)", "\\( \\tan x + C \\)", "\\( \\cos x + C \\)"], c: 1 },
+                { q: "Tính \\( I = \\int_{0}^{\\frac{\\pi}{2}} \\sin x dx \\):", a: ["0", "1", "-1", "\\( \\pi \\)"], c: 1 },
+                { q: "Diện tích hình phẳng giới hạn bởi \\( y=f(x) \\), trục \\( Ox \\), \\( x=a, x=b \\) là:", a: ["\\( \\int_{a}^{b} f(x) dx \\)", "\\( \\int_{a}^{b} |f(x)| dx \\)", "\\( \\pi \\int_{a}^{b} f^2(x) dx \\)", "\\( 2\\pi \\int_{a}^{b} f(x) dx \\)"], c: 1 },
+                { q: "Thể tích khối tròn xoay tạo ra khi quay hình phẳng quanh trục \\( Ox \\) là:", a: ["\\( V = \\pi \\int_{a}^{b} f^2(x) dx \\)", "\\( V = \\int_{a}^{b} f^2(x) dx \\)", "\\( V = \\pi \\int_{a}^{b} |f(x)| dx \\)", "\\( V = 2\\pi \\int_{a}^{b} f(x) dx \\)"], c: 0 },
+                { q: "Số phức \\( z = a + bi \\) có môđun được tính theo công thức:", a: ["\\( a^2 + b^2 \\)", "\\( \\sqrt{a^2 + b^2} \\)", "\\( \\sqrt{a^2 - b^2} \\)", "\\( a+b \\)"], c: 1 },
+                { q: "Tìm nguyên hàm của \\( f(x) = e^x \\):", a: ["\\( e^x + C \\)", "\\( e^{-x} + C \\)", "\\( x.e^{x-1} + C \\)", "\\( \\ln |x| + C \\)"], c: 0 },
+                { q: "Trong không gian \\( Oxyz \\), tọa độ vectơ đơn vị \\( \\vec{j} \\) là:", a: ["(1;0;0)", "(0;1;0)", "(0;0;1)", "(1;1;1)"], c: 1 },
+                { q: "Phương trình mặt cầu tâm \\( I(a;b;c) \\) bán kính \\( R \\) là:", a: ["\\( (x+a)^2+(y+b)^2+(z+c)^2=R^2 \\)", "\\( (x-a)^2+(y-b)^2+(z-c)^2=R^2 \\)", "\\( x^2+y^2+z^2=R^2 \\)", "\\( (x-a)^2+(y-b)^2+(z-c)^2=R \\)"], c: 1 },
+                { q: "Nguyên hàm của \\( f(x) = \\frac{1}{x} \\) trên \\( (0; +\\infty) \\) là:", a: ["\\( -\\frac{1}{x^2} + C \\)", "\\( \\ln x + C \\)", "\\( \\frac{1}{x^2} + C \\)", "\\( e^x + C \\)"], c: 1 },
+                { q: "Tính tích phân \\( I = \\int_{1}^{e} \\frac{1}{x} dx \\):", a: ["e", "1", "0", "\\( e-1 \\)"], c: 1 },
+                { q: "Số phức liên hợp của \\( z = 2 + 3i \\) là:", a: ["\\( \\bar{z} = 2 - 3i \\)", "\\( \\bar{z} = -2 + 3i \\)", "\\( \\bar{z} = -2 - 3i \\)", "\\( \\bar{z} = 3 + 2i \\)"], c: 0 },
+                { q: "Phần thực của số phức \\( z = (1+i)^2 \\) là:", a: ["0", "2", "-2", "1"], c: 0 },
+                { q: "Nguyên hàm của \\( f(x) = a^x \\) (với \\( 0 < a \\neq 1 \\)) là:", a: ["\\( a^x \\ln a + C \\)", "\\( \\frac{a^x}{\\ln a} + C \\)", "\\( a^{x+1} + C \\)", "\\( x a^{x-1} + C \\)"], c: 1 },
+                { q: "Tính \\( I = \\int_{0}^{1} e^x dx \\):", a: ["e", "\\( e-1 \\)", "1", "\\( e+1 \\)"], c: 1 },
+                { q: "Vectơ pháp tuyến của mặt phẳng \\( 2x - y + 3z - 1 = 0 \\) là:", a: ["\\( (2; -1; 3) \\)", "\\( (2; 1; 3) \\)", "\\( (2; -1; -1) \\)", "\\( (-2; 1; 3) \\)"], c: 0 },
+                { q: "Khoảng cách từ điểm \\( M(x_0; y_0; z_0) \\) đến mặt phẳng \\( (P): Ax+By+Cz+D=0 \\) là:", a: ["\\( \\frac{|Ax_0+By_0+Cz_0+D|}{\\sqrt{A^2+B^2+C^2}} \\)", "\\( \\frac{Ax_0+By_0+Cz_0+D}{\\sqrt{A^2+B^2+C^2}} \\)", "\\( \\sqrt{A^2+B^2+C^2} \\)", "\\( |Ax_0+By_0+Cz_0+D| \\)"], c: 0 },
+                { q: "Tâm của mặt cầu \\( x^2+y^2+z^2-2x+4y-6z+1=0 \\) là:", a: ["(1; -2; 3)", "(-1; 2; -3)", "(2; -4; 6)", "(1; 2; 3)"], c: 0 },
+                { q: "Tích phân \\( I = \\int_{0}^{\\pi} \\cos x dx \\) bằng:", a: ["0", "2", "-2", "1"], c: 0 },
+                { q: "Số phức \\( z = i^3 \\) bằng:", a: ["i", "-i", "1", "-1"], c: 1 },
+                { q: "Nguyên hàm của \\( f(x) = \\frac{1}{\\cos^2 x} \\) là:", a: ["\\( \\tan x + C \\)", "\\( -\\tan x + C \\)", "\\( \\cot x + C \\)", "\\( -\\cot x + C \\)"], c: 0 },
+                { q: "Nếu \\( \\int_{1}^{2} f(x)dx = 3 \\) và \\( \\int_{1}^{2} g(x)dx = 5 \\) thì \\( \\int_{1}^{2} [f(x)+g(x)]dx \\) bằng:", a: ["8", "2", "-2", "15"], c: 0 },
+                { q: "Nguyên hàm của \\( f(x) = 7^x \\) là:", a: ["\\( \\frac{7^x}{\\ln 7} + C \\)", "\\( 7^x \\ln 7 + C \\)", "\\( \\frac{7^{x+1}}{x+1} + C \\)", "\\( 7^x + C \\)"], c: 0 },
+                { q: "Trong không gian, phương trình tham số đường thẳng đi qua \\( M(x_0;y_0;z_0) \\) và có VTCP \\( \\vec{u}(a;b;c) \\) là:", a: ["\\( x=x_0+at, y=y_0+bt, z=z_0+ct \\)", "\\( x=x_0-at, y=y_0-bt, z=z_0-ct \\)", "\\( ax+by+cz+d=0 \\)", "\\( x=a+x_0t, y=b+y_0t, z=c+z_0t \\)"], c: 0 },
+                { q: "Môđun của số phức \\( z = 1 + i \\) là:", a: ["1", "2", "\\( \\sqrt{2} \\)", "0"], c: 2 },
+                { q: "Nguyên hàm của \\( f(x) = \\sin x \\) là:", a: ["\\( \\cos x + C \\)", "\\( -\\cos x + C \\)", "\\( \\tan x + C \\)", "\\( -\\sin x + C \\)"], c: 1 },
+                { q: "Tính \\( I = \\int_{0}^{2} x^2 dx \\):", a: ["\\( \\frac{8}{3} \\)", "4", "8", "\\( \\frac{4}{3} \\)"], c: 0 },
+                { q: "Phần ảo của số phức \\( z = 5 - 2i \\) là:", a: ["-2", "2", "-2i", "5"], c: 0 },
+                { q: "Hình chiếu của \\( M(1; 2; 3) \\) lên trục \\( Ox \\) có tọa độ là:", a: ["(1; 0; 0)", "(0; 2; 0)", "(0; 0; 3)", "(1; 2; 0)"], c: 0 }
+            ],
+            hoa: [
+                { q: "Công thức tổng quát của este no, đơn chức, mạch hở là:", a: ["\\( C_nH_{2n+2}O_2 \\)", "\\( C_nH_{2n}O_2 \\) (\\( n \\geq 2 \\))", "\\( C_nH_{2n-2}O_2 \\)", "\\( C_nH_{2n}O \\)"], c: 1 },
+                { q: "Phản ứng giữa axit axetic và ancol etylic (H2SO4 đặc, t°) tạo thành:", a: ["Metyl axetat", "Etyl axetat", "Etyl fomat", "Metyl fomat"], c: 1 },
+                { q: "Chất nào sau đây là đisaccarit?", a: ["Glucozơ", "Fructozơ", "Saccarozơ", "Xenlulozơ"], c: 2 },
+                { q: "Công thức của chất béo tripanmitin là:", a: ["\\( (C_{17}H_{33}COO)_3C_3H_5 \\)", "\\( (C_{15}H_{31}COO)_3C_3H_5 \\)", "\\( (C_{17}H_{35}COO)_3C_3H_5 \\)", "\\( C_{15}H_{31}COOH \\)"], c: 1 },
+                { q: "Thủy phân hoàn toàn tinh bột thu được sản phẩm duy nhất là:", a: ["Fructozơ", "Glucozơ", "Saccarozơ", "Mantozơ"], c: 1 },
+                { q: "Trong phân tử Glucozơ có bao nhiêu nhóm \\( -OH \\)?", a: ["4", "5", "6", "3"], c: 1 },
+                { q: "Phản ứng thủy phân este trong môi trường kiềm được gọi là:", a: ["Este hóa", "Xà phòng hóa", "Trùng ngưng", "Hiđrat hóa"], c: 1 },
+                { q: "Chất nào sau đây không tham gia phản ứng tráng bạc?", a: ["Glucozơ", "Fructozơ", "Saccarozơ", "Andehit axetic"], c: 2 },
+                { q: "Để nhận biết hồ tinh bột, ta dùng dung dịch:", a: ["\\( AgNO_3/NH_3 \\)", "\\( Cu(OH)_2 \\)", "\\( I_2 \\)", "\\( Br_2 \\)"], c: 2 },
+                { q: "Sản phẩm cuối cùng của quá trình thủy phân protein là:", a: ["Peptit", "Axit béo", "Các \\( \\alpha \\)-amino axit", "Este"], c: 2 },
+                { q: "Tơ nilon-6,6 thuộc loại tơ:", a: ["Thiên nhiên", "Tổng hợp", "Nhân tạo", "Bán tổng hợp"], c: 1 },
+                { q: "Công thức của amin bậc 1 metylamin là:", a: ["\\( CH_3NH_2 \\)", "\\( (CH_3)_2NH \\)", "\\( (CH_3)_3N \\)", "\\( C_2H_5NH_2 \\)"], c: 0 },
+                { q: "Polime nào sau đây được dùng làm chất dẻo?", a: ["PVC", "Tơ tằm", "Protein", "Cao su buna"], c: 0 },
+                { q: "Kim loại nào có tính dẫn điện tốt nhất?", a: ["Cu", "Al", "Ag", "Au"], c: 2 },
+                { q: "Ăn mòn điện hóa học xảy ra khi có sự tiếp xúc của:", a: ["Hai kim loại khác nhau", "Một kim loại và chất khí", "Kim loại tinh khiết", "Kim loại trong chân không"], c: 0 },
+                { q: "Số nguyên tử hiđro trong phân tử Glucozơ là:", a: ["6", "12", "10", "11"], c: 1 },
+                { q: "Este \\( CH_3COOC_2H_5 \\) có tên gọi là:", a: ["Metyl axetat", "Etyl axetat", "Etyl fomat", "Metyl propionat"], c: 1 },
+                { q: "Anilin (\\( C_6H_5NH_2 \\)) phản ứng với dung dịch nào tạo kết tủa trắng?", a: ["HCl", "NaOH", "Nước \\( Br_2 \\)", "\\( NaCl \\)"], c: 2 },
+                { q: "Chất nào sau đây là amin bậc 2?", a: ["\\( CH_3NH_2 \\)", "\\( (CH_3)_2NH \\)", "\\( (CH_3)_3N \\)", "\\( C_6H_5NH_2 \\)"], c: 1 },
+                { q: "Glucozơ và Fructozơ là hai chất:", a: ["Đồng phân", "Đồng đẳng", "Cùng dãy biến hóa", "Một chất duy nhất"], c: 0 },
+                { q: "Xenlulozơ cấu tạo bởi các mắt xích:", a: ["\\( \\alpha \\)-glucozơ", "\\( \\beta \\)-glucozơ", "\\( \\alpha \\)-fructozơ", "\\( \\beta \\)-fructozơ"], c: 1 },
+                { q: "Đốt cháy este no đơn chức mạch hở thu được:", a: ["\\( n_{CO_2} > n_{H_2O} \\)", "\\( n_{CO_2} < n_{H_2O} \\)", "\\( n_{CO_2} = n_{H_2O} \\)", "\\( n_{O_2} = n_{CO_2} \\)"], c: 2 },
+                { q: "Kim loại kiềm thuộc nhóm nào trong bảng tuần hoàn?", a: ["IA", "IIA", "IIIA", "IB"], c: 0 },
+                { q: "Chất làm đổi màu quỳ tím sang xanh là:", a: ["Anilin", "Metylamin", "Glucozơ", "Ancol etylic"], c: 1 },
+                { q: "Để khử mùi tanh của cá (do các amin gây ra), ta dùng:", a: ["Nước muối", "Giấm ăn", "Nước vôi", "Dung dịch kiềm"], c: 1 },
+                { q: "Thủy phân Saccarozơ trong môi trường axit thu được:", a: ["Glucozơ và Fructozơ", "Chỉ Glucozơ", "Chỉ Fructozơ", "Glucozơ và Mantozơ"], c: 0 },
+                { q: "Kim loại nào sau đây là kim loại kiềm thổ?", a: ["Na", "K", "Ca", "Al"], c: 2 },
+                { q: "Tên gọi của polime \\( (-CH_2-CH_2-)_n \\) là:", a: ["Polietilen", "Polivinyl clorua", "Polistiren", "Polipropilen"], c: 0 },
+                { q: "Chất béo lỏng (dầu thực vật) chứa nhiều gốc axit:", a: ["No", "Không no", "Vô cơ", "Bão hòa"], c: 1 },
+                { q: "Công thức phân tử của tinh bột là:", a: ["\\( (C_6H_{10}O_5)_n \\)", "\\( C_{12}H_{22}O_{11} \\)", "\\( C_6H_{12}O_6 \\)", "\\( (C_6H_{12}O_6)_n \\)"], c: 0 }
+            ],
+            ly: [
+                { q: "Chu kỳ dao động điều hòa của con lắc lò xo là:", a: ["\\( T = 2\\pi \\sqrt{\\frac{m}{k}} \\)", "\\( T = 2\\pi \\sqrt{\\frac{k}{m}} \\)", "\\( T = 2\\pi \\sqrt{\\frac{l}{g}} \\)", "\\( T = \\frac{1}{2\\pi} \\sqrt{\\frac{k}{m}} \\)"], c: 0 },
+                { q: "Bước sóng \\( \\lambda \\) được tính theo vận tốc \\( v \\) và chu kỳ \\( T \\) là:", a: ["\\( \\lambda = v.T \\)", "\\( \\lambda = \\frac{v}{T} \\)", "\\( \\lambda = \\frac{T}{v} \\)", "\\( \\lambda = v.f \\)"], c: 0 },
+                { q: "Cường độ dòng điện hiệu dụng \\( I \\) liên hệ với cường độ cực đại \\( I_0 \\) là:", a: ["\\( I = I_0 \\sqrt{2} \\)", "\\( I = \\frac{I_0}{\\sqrt{2}} \\)", "\\( I = 2I_0 \\)", "\\( I = \\frac{I_0}{2} \\)"], c: 1 },
+                { q: "Năng lượng của một photon ánh sáng (thuyết lượng tử Planck) là:", a: ["\\( \\epsilon = hf \\)", "\\( \\epsilon = \\frac{h}{f} \\)", "\\( \\epsilon = h \\lambda \\)", "\\( \\epsilon = \\frac{\\lambda}{h} \\)"], c: 0 },
+                { q: "Tần số góc \\( \\omega \\) của con lắc đơn dao động điều hòa là:", a: ["\\( \\sqrt{\\frac{g}{l}} \\)", "\\( \\sqrt{\\frac{l}{g}} \\)", "\\( 2\\pi \\sqrt{\\frac{l}{g}} \\)", "\\( \\sqrt{\\frac{k}{m}} \\)"], c: 0 },
+                { q: "Trong sóng dừng, khoảng cách giữa hai nút sóng liên tiếp là:", a: ["\\( \\lambda \\)", "\\( \\frac{\\lambda}{2} \\)", "\\( \\frac{\\lambda}{4} \\)", "\\( 2\\lambda \\)"], c: 1 },
+                { q: "Công thức tính dung kháng của tụ điện là:", a: ["\\( Z_C = \\omega C \\)", "\\( Z_C = \\frac{1}{\\omega C} \\)", "\\( Z_C = \\frac{\\omega}{C} \\)", "\\( Z_C = \\frac{C}{\\omega} \\)"], c: 1 },
+                { q: "Mạch điện RLC nối tiếp có cộng hưởng điện khi:", a: ["\\( Z_L = Z_C \\)", "\\( Z_L > Z_C \\)", "\\( R = Z_L \\)", "\\( \\omega = LC \\)"], c: 0 },
+                { q: "Sóng âm truyền nhanh nhất trong môi trường nào?", a: ["Chân không", "Chất khí", "Chất lỏng", "Chất rắn"], c: 3 },
+                { q: "Hiện tượng quang điện ngoài là hiện tượng electron bứt ra khỏi:", a: ["Bề mặt kim loại", "Khối chất lỏng", "Nguyên tử chất khí", "Lớp bán dẫn"], c: 0 },
+                { q: "Chiết suất của nước đối với ánh sáng đơn sắc nào là lớn nhất?", a: ["Đỏ", "Lam", "Vàng", "Tím"], c: 3 },
+                { q: "Hạt nhân nguyên tử được cấu tạo từ các hạt:", a: ["Proton và electron", "Proton và nơtron", "Electron và nơtron", "Chỉ proton"], c: 1 },
+                { q: "Phản ứng nhiệt hạch là phản ứng:", a: ["Phân rã hạt nhân nặng", "Kết hợp hai hạt nhân nhẹ", "Bắn phá hạt nhân bằng proton", "Phát ra tia alpha"], c: 1 },
+                { q: "Đơn vị của mức cường độ âm là:", a: ["Ben (B) hoặc Đềxiben (dB)", "Oát trên mét vuông (W/m2)", "Héc (Hz)", "Niutơn (N)"], c: 0 },
+                { q: "Máy biến áp là thiết bị dùng để thay đổi:", a: ["Tần số dòng điện", "Điện áp xoay chiều", "Công suất điện", "Dòng điện một chiều"], c: 1 },
+                { q: "Tia nào sau đây có khả năng đâm xuyên mạnh nhất?", a: ["Tia hồng ngoại", "Tia tử ngoại", "Tia Rơnghen (X)", "Tia gamma (\\( \\gamma \\))"], c: 3 },
+                { q: "Đại lượng nào sau đây đặc trưng cho độ cao của âm?", a: ["Cường độ âm", "Mức cường độ âm", "Tần số âm", "Đồ thị dao động âm"], c: 2 },
+                { q: "Trong hiện tượng giao thoa sóng nước, các điểm cực đại có hiệu đường truyền:", a: ["\\( d_2-d_1 = k\\lambda \\)", "\\( d_2-d_1 = (k+0.5)\\lambda \\)", "\\( d_2-d_1 = (2k+1)\\lambda \\)", "\\( d_2-d_1 = k \\frac{\\lambda}{2} \\)"], c: 0 },
+                { q: "Quang phổ liên tục phụ thuộc vào yếu tố nào?", a: ["Bản chất của vật phát sáng", "Nhiệt độ của vật phát sáng", "Áp suất của vật phát sáng", "Cấu tạo phân tử của vật"], c: 1 },
+                { q: "Sóng điện từ là sóng:", a: ["Sóng dọc", "Sóng ngang", "Sóng cơ", "Sóng không lan truyền được"], c: 1 },
+                { q: "Hệ số công suất của mạch RLC nối tiếp được tính bằng:", a: ["\\( \\cos \\phi = \\frac{R}{Z} \\)", "\\( \\cos \\phi = \\frac{Z}{R} \\)", "\\( \\cos \\phi = \\frac{R}{Z_L} \\)", "\\( \\cos \\phi = \\frac{R}{Z_C} \\)"], c: 0 },
+                { q: "Một máy phát điện xoay chiều có \\( p \\) cặp cực, quay với tốc độ \\( n \\) (vòng/s). Tần số \\( f \\) là:", a: ["\\( f = np \\)", "\\( f = 60np \\)", "\\( f = \\frac{n}{p} \\)", "\\( f = \\frac{np}{60} \\)"], c: 0 },
+                { q: "Tia tử ngoại có tác dụng nào sau đây?", a: ["Sấy khô nông sản", "Chữa bệnh còi xương", "Chiếu điện, chụp điện", "Điều khiển từ xa"], c: 1 },
+                { q: "Dao động tắt dần là dao động có:", a: ["Biên độ giảm dần theo thời gian", "Tần số giảm dần theo thời gian", "Vận tốc giảm dần theo thời gian", "Pha giảm dần theo thời gian"], c: 0 },
+                { q: "Lực kéo về tác dụng lên con lắc lò xo có biểu thức:", a: ["\\( F = -kx \\)", "\\( F = kx \\)", "\\( F = -mg \\)", "\\( F = ma \\)"], c: 0 },
+                { q: "Sóng ngang truyền được trong môi trường:", a: ["Chất rắn và bề mặt chất lỏng", "Chất khí", "Chất lỏng", "Chân không"], c: 0 },
+                { q: "Quang trở hoạt động dựa trên hiện tượng:", a: ["Quang điện ngoài", "Quang điện trong", "Phát quang", "Tán sắc"], c: 1 },
+                { q: "Số nucleon có trong hạt nhân \\( _{Z}^{A}X \\) là:", a: ["Z", "A", "A-Z", "A+Z"], c: 1 },
+                { q: "Trong chân không, tốc độ ánh sáng là:", a: ["\\( 3.10^5 \\) m/s", "\\( 3.10^8 \\) m/s", "\\( 3.10^{10} \\) m/s", "\\( 300.000 \\) m/s"], c: 1 },
+                { q: "Độ hụt khối của hạt nhân \\( _{Z}^{A}X \\) là:", a: ["\\( \\Delta m = Z.m_p + (A-Z)m_n - m_X \\)", "\\( \\Delta m = Z.m_p + A.m_n - m_X \\)", "\\( \\Delta m = m_X - Z.m_p \\)", "\\( \\Delta m = (A-Z)m_n - m_X \\)"], c: 0 }
+            ],
+            tin: [
+                { q: "Độ phức tạp thuật toán tìm kiếm nhị phân là:", a: ["\\( O(n) \\)", "\\( O(\\log n) \\)", "\\( O(n^2) \\)", "\\( O(1) \\)"], c: 1 },
+                { q: "Mạng LAN là viết tắt của:", a: ["Local Area Network", "Large Area Network", "Link Access Network", "Low Area Network"], c: 0 },
+                { q: "Giao thức truyền siêu văn bản phổ biến trên Web là:", a: ["FTP", "HTTP", "SMTP", "TCP/IP"], c: 1 },
+                { q: "Trong SQL, lệnh nào dùng để thêm dữ liệu mới?", a: ["ADD", "UPDATE", "INSERT", "SELECT"], c: 2 },
+                { q: "Địa chỉ IPv4 gồm bao nhiêu nhóm số?", a: ["2", "3", "4", "6"], c: 2 },
+                { q: "Kiểu dữ liệu nào dùng để lưu số nguyên trong Python?", a: ["float", "int", "string", "bool"], c: 1 },
+                { q: "Hàm nào dùng để in dữ liệu ra màn hình trong Python?", a: ["input()", "write()", "print()", "echo()"], c: 2 },
+                { q: "Đâu là một hệ quản trị cơ sở dữ liệu?", a: ["MySQL", "Microsoft Access", "Oracle", "Tất cả đều đúng"], c: 3 },
+                { q: "Cấu trúc dữ liệu LIFO (Last In First Out) tương ứng với:", a: ["Hàng đợi (Queue)", "Ngăn xếp (Stack)", "Cây (Tree)", "Mảng (Array)"], c: 1 },
+                { q: "Tên miền có đuôi '.gov' thường dành cho:", a: ["Giáo dục", "Thương mại", "Chính phủ", "Tổ chức phi lợi nhuận"], c: 2 },
+                { q: "Phép toán '10 % 3' trong lập trình cho kết quả là:", a: ["3", "3.33", "1", "0"], c: 2 },
+                { q: "Vòng lặp nào thực hiện với số lần biết trước?", a: ["while", "for", "do-while", "repeat"], c: 1 },
+                { q: "Hệ điều hành là:", a: ["Phần mềm ứng dụng", "Phần mềm hệ thống", "Phần cứng", "Thiết bị đầu cuối"], c: 1 },
+                { q: "Mỗi Byte tương ứng với bao nhiêu Bit?", a: ["4", "8", "16", "32"], c: 1 },
+                { q: "AI là viết tắt của cụm từ nào?", a: ["Artificial Intelligence", "Auto Information", "Active Interne", "Apple Intelligence"], c: 0 },
+                { q: "Thiết bị dùng để kết nối các mạng máy tính khác nhau là:", a: ["Hub", "Switch", "Router", "Bàn phím"], c: 2 },
+                { q: "HTML là ngôn ngữ dùng để:", a: ["Lập trình ứng dụng", "Đánh dấu siêu văn bản", "Quản trị cơ sở dữ liệu", "Thiết kế đồ họa"], c: 1 },
+                { q: "Trong lập trình, lỗi cú pháp (Syntax Error) xảy ra khi:", a: ["Sai thuật toán", "Viết mã sai quy tắc ngôn ngữ", "Máy tính hết pin", "Internet bị ngắt"], c: 1 },
+                { q: "CSS được sử dụng trong phát triển Web để:", a: ["Xử lý dữ liệu", "Định dạng kiểu dáng (màu sắc, bố cục)", "Lưu trữ tài khoản", "Kết nối Server"], c: 1 },
+                { q: "JavaScript là ngôn ngữ chạy chủ yếu ở đâu?", a: ["Server", "Trình duyệt (Client)", "Hệ điều hành", "Database"], c: 1 },
+                { q: "Điện toán đám mây có tên tiếng Anh là:", a: ["Sky Computing", "Cloud Computing", "Online Storage", "Web Service"], c: 1 },
+                { q: "Đơn vị đo tốc độ CPU thường là:", a: ["GHz", "GB", "Mbps", "Pixel"], c: 0 },
+                { q: "RAM là loại bộ nhớ:", a: ["Lưu trữ vĩnh viễn", "Chỉ đọc", "Truy cập ngẫu nhiên, dữ liệu mất khi mất điện", "Bộ nhớ ngoài"], c: 2 },
+                { q: "Trong Python, để kiểm tra điều kiện ta dùng từ khóa:", a: ["if", "case", "switch", "loop"], c: 0 },
+                { q: "Tên biến nào sau đây là KHÔNG hợp lệ trong lập trình?", a: ["my_var", "_var1", "2var", "var_name"], c: 2 },
+                { q: "Giao thức SMTP dùng để làm gì?", a: ["Truyền file", "Gửi thư điện tử (Email)", "Duyệt web", "Chat trực tuyến"], c: 1 },
+                { q: "Tường lửa (Firewall) có chức năng chính là:", a: ["Diệt virus", "Ngăn chặn truy cập trái phép", "Làm mát máy tính", "Tăng tốc độ mạng"], c: 1 },
+                { q: "Một hệ thống gồm các máy tính kết nối với nhau để chia sẻ tài nguyên gọi là:", a: ["Mạng máy tính", "Hệ điều hành", "Phần mềm", "Ổ cứng"], c: 0 },
+                { q: "Trình duyệt web phổ biến hiện nay là:", a: ["Google Chrome", "Word", "Excel", "Photoshop"], c: 0 },
+                { q: "Phép toán logic AND cho kết quả ĐÚNG khi nào?", a: ["Một trong hai điều kiện đúng", "Cả hai điều kiện đều đúng", "Cả hai điều kiện đều sai", "Khi hai điều kiện khác nhau"], c: 1 }
+            ]
+        };
 
-    function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        particles.forEach(p => { p.update(); p.draw(); });
-        requestAnimationFrame(animate);
-    }
+        let currentQ = [];
+        let idx = 0;
+        let score = 0;
 
-    window.addEventListener('resize', () => { initCanvas(); createParticles(); });
-    initCanvas();
-    createParticles();
-    animate();
-
-    // --- Modal Logic ---
-    function openModal(id) {
-        document.getElementById(id).classList.add('active');
-    }
-
-    function closeModal(id) {
-        document.getElementById(id).classList.remove('active');
-    }
-
-    function focusMember(el) {
-        if (el.classList.contains('selected')) {
-            el.classList.remove('selected');
-        } else {
-            document.querySelectorAll('.member-sector').forEach(s => s.classList.remove('selected'));
-            el.classList.add('selected');
-        }
-    }
-
-    // --- Quiz Data & Logic ---
-    const dataMath = [
-        { q: "Câu 1. Trong các khẳng định sau, khẳng định nào mô tả đúng và đầy đủ nhất về định nghĩa nguyên hàm?", a: ["Hàm số F(x) được gọi là một nguyên hàm của hàm số f(x) trên K nếu đạo hàm của f(x) bằng F(x) với mọi x thuộc K.", "Hàm số F(x) được gọi là một nguyên hàm của hàm số f(x) trên K nếu F(x) = f(x) với mọi x thuộc K.", "Hàm số F(x) được gọi là một nguyên hàm của hàm số f(x) trên K nếu đạo hàm của F(x) bằng f(x) với mọi x thuộc K.", "Hàm số F(x) được gọi là một nguyên hàm của hàm số f(x) trên K nếu đạo hàm của F(x) bằng f(x) với một vài giá trị x thuộc K."], c: 2 },
-        { q: "Câu 2. Họ nguyên hàm của hàm số f(x) = 0 là gì?", a: ["0", "x + C", "C (hằng số)", "1"], c: 2 },
-        { q: "Câu 3. Họ nguyên hàm của hàm số f(x) = 1 là gì?", a: ["x + C", "1", "C", "0"], c: 0 },
-        { q: "Câu 4. Tìm họ nguyên hàm của f(x) = x.", a: ["1 + C", "x² + C", "(1/2)x² + C", "(1/2)x + C"], c: 2 },
-        { q: "Câu 5. Tìm họ nguyên hàm của f(x) = 1/√x với x > 0.", a: ["2√x + C", "(1/2)√x + C", "-1/(2x√x) + C", "ln(√x) + C"], c: 0 },
-        { q: "Câu 6. Tìm họ nguyên hàm của f(x) = cos(x).", a: ["sin(x) + C", "-sin(x) + C", "cos(x) + C", "-cos(x) + C"], c: 0 },
-        { q: "Câu 7. Tìm họ nguyên hàm của f(x) = 1/sin²x trên các khoảng xác định của nó.", a: ["tan(x) + C", "-tan(x) + C", "cot(x) + C", "-cot(x) + C"], c: 3 },
-        { q: "Câu 8. Tìm họ nguyên hàm của f(x) = 2^x.", a: ["2^x.ln(2) + C", "2^x + C", "2^x / ln(2) + C", "x.2^(x-1) + C"], c: 2 },
-        { q: "Câu 9. Tính chất ∫[f(x) – g(x)]dx = ∫f(x)dx – ∫g(x)dx được suy ra từ tính chất nào của đạo hàm?", a: ["Đạo hàm của một tổng/hiệu.", "Đạo hàm của một tích.", "Đạo hàm của một thương.", "Quy tắc chuỗi (đạo hàm hàm hợp)."], c: 0 },
-        { q: "Câu 10. Nếu F(x) là một nguyên hàm của hàm số f(x) trên một khoảng K và C là một hằng số tùy ý, thì mối quan hệ giữa G(x) = F(x) + C và f(x) là gì?", a: ["G(x) cũng là một nguyên hàm của f(x) trên K vì đạo hàm của G(x) bằng đạo hàm của F(x) cộng C, tức là f(x) + C.", "G(x) không phải là một nguyên hàm của f(x) vì có sự xuất hiện của hằng số C.", "G(x) cũng là một nguyên hàm của f(x) trên K vì đạo hàm của hằng số C bằng 0.", "G(x) chỉ là một nguyên hàm của f(x) khi C = 0."], c: 2 },
-        { q: "Câu 11. Xét hàm số f(x) = 3x². Hàm số F(x) = x³ là một nguyên hàm của f(x). Đâu là cách diễn đạt đúng về tập hợp tất cả các nguyên hàm của f(x)?", a: ["Họ nguyên hàm của f(x) là x³.", "Họ nguyên hàm của f(x) là ∫3x²dx = x³ + C, với C là hằng số.", "Họ nguyên hàm của f(x) là 3x³ + C, với C là hằng số.", "Không tồn tại khái niệm họ nguyên hàm, chỉ có một nguyên hàm duy nhất."], c: 1 },
-        { q: "Câu 12. Phát biểu nào sau đây là đúng?", a: ["Hai nguyên hàm bất kỳ của cùng một hàm số thì bằng nhau.", "Hai nguyên hàm bất kỳ của cùng một hàm số có thể sai khác nhau một lượng tùy ý.", "Hai nguyên hàm bất kỳ của cùng một hàm số chỉ sai khác nhau một hằng số.", "Một hàm số chỉ có duy nhất một nguyên hàm."], c: 2 },
-        { q: "Câu 13. Cho F(x) và G(x) đều là các nguyên hàm của hàm số f(x) trên K. Mối quan hệ giữa đồ thị của y = F(x) và y = G(x) là gì?", a: ["Chúng là hai đường cong đối xứng nhau qua trục Ox.", "Chúng là hai đường cong có thể thu được bằng cách tịnh tiến lẫn nhau theo phương của trục Oy.", "Chúng trùng nhau hoàn toàn.", "Chúng là hai đường cong không liên quan."], c: 1 },
-        { q: "Câu 14. Dựa vào định nghĩa, đẳng thức nào sau đây luôn đúng?", a: ["∫(đạo hàm của f(x))dx = (đạo hàm của f(x)) + C", "∫f(x)dx = (đạo hàm của f(x)) + C", "Đạo hàm của (∫f(x)dx) bằng f(x).", "Đạo hàm của (∫f(x)dx) bằng f(x) + C."], c: 2 },
-        { q: "Câu 15. Khẳng định nào sau đây là sai về tính chất của nguyên hàm?", a: ["∫[f(x) + g(x)]dx = ∫f(x)dx + ∫g(x)dx", "∫k.f(x)dx = k.∫f(x)dx (với k là hằng số khác 0)", "∫[f(x).g(x)]dx = [∫f(x)dx].[∫g(x)dx]", "Mọi hàm số liên tục trên K đều có nguyên hàm trên K."], c: 2 },
-        { q: "Câu 16. Biểu thức f(x)dx trong ∫f(x)dx được gọi là gì và nó bằng với biểu thức nào sau đây nếu F(x) là một nguyên hàm của f(x)?", a: ["Vi phân của f(x), bằng (đạo hàm của f(x))dx.", "Vi phân của F(x), bằng (đạo hàm của F(x))dx.", "Tích phân của f(x).", "Đạo hàm của F(x)."], c: 1 },
-        { q: "Câu 17. Cho ∫f(x)dx = 2x² + sin(x) + C. Hàm số f(x) là hàm số nào dưới đây?", a: ["f(x) = 4x – cos(x)", "f(x) = 4x + cos(x)", "f(x) = (2/3)x³ – cos(x)", "f(x) = 2x + sin(x)"], c: 1 },
-        { q: "Câu 18. Nếu ∫f(x)dx = F(x) + C thì ∫f(2x)dx bằng:", a: ["F(2x) + C", "2F(2x) + C", "(1/2)F(2x) + C", "2F(x) + C"], c: 2 },
-        { q: "Câu 19. Tìm họ nguyên hàm F(x) của hàm số f(x) = (x+1)².", a: ["F(x) = (1/3)(x+1)³ + C", "F(x) = 2(x+1) + C", "F(x) = x³ + x² + x + C", "F(x) = (1/3)x³ + x² + x + C"], c: 0 },
-        { q: "Câu 20. Tìm một nguyên hàm F(x) của hàm số f(x) = e^x + 2 biết rằng F(0) = 3.", a: ["F(x) = e^x + 2x + 2", "F(x) = e^x + 2x + 3", "F(x) = e^x + 2", "F(x) = e^x + 3"], c: 0 },
-        { q: "Câu 21. Tìm nguyên hàm của f(x) = 1/cos²x biết đồ thị của nó đi qua điểm M(π/4, 3).", a: ["tan(x) + 2", "tan(x) + 3", "-cot(x) + 4", "tan(x)"], c: 0 },
-        { q: "Câu 22. Tìm nguyên hàm F(x) của f(x) = 1/x biết F(1) = 2.", a: ["F(x) = ln|x| + 1", "F(x) = ln(x) + 2", "F(x) = ln|x| + 2", "F(x) = -1/x² + 3"], c: 2 },
-        { q: "Câu 23. Một vật thể chuyển động với gia tốc a(t) = 12t (m/s²). Biết rằng tại thời điểm t=1 s, vận tốc của vật là v(1) = 10 m/s. Hàm số biểu thị vận tốc v(t) của vật là gì?", a: ["v(t) = 12t² + C", "v(t) = 6t² + 4", "v(t) = 6t² + 10", "v(t) = 12"], c: 1 },
-        { q: "Câu 24. Một chiếc ô tô đang chạy thì hãm phanh, chuyển động chậm dần với vận tốc v(t) = 20 – 4t (m/s), trong đó t là thời gian tính bằng giây kể từ lúc hãm phanh. Quãng đường ô tô đi được từ lúc hãm phanh đến khi dừng hẳn là bao nhiêu?", a: ["40 m", "50 m", "20 m", "100 m"], c: 1 },
-        { q: "Câu 25. Tìm họ nguyên hàm của hàm số f(x) = 2sin(x/2)cos(x/2).", a: ["-cos(x) + C", "sin(x) + C", "-cos(2x) + C", "2sin²(x/2) + C"], c: 0 },
-        { q: "Câu 26. Tại sao khi tìm nguyên hàm của f(x) = 1/x trên tập xác định R\\{0}, ta phải viết kết quả là ln|x| + C thay vì ln(x) + C?", a: ["Vì ln|x| có đạo hàm là 1/x trên cả hai khoảng (-∞, 0) và (0, +∞).", "Vì ln(x) chỉ xác định với x > 0, trong khi f(x) còn xác định với x < 0.", "Đây chỉ là quy ước để bài toán đơn giản hơn.", "Cả A và B đều là những lý do quan trọng."], c: 3 },
-        { q: "Câu 27. Cho hai hàm số F(x) và G(x) sao cho đạo hàm của F(x) bằng đạo hàm của G(x) với mọi x thuộc K. Kết luận nào sau đây là chính xác nhất?", a: ["F(x) = G(x) trên K.", "F(x) – G(x) = C (với C là hằng số) trên K.", "Đồ thị y = F(x) song song với đồ thị y = G(x).", "∫F(x)dx = ∫G(x)dx."], c: 1 },
-        { q: "Câu 28. Cho F(x) là một nguyên hàm của f(x) trên R. Nếu f(x) > 0 với mọi x thuộc R thì ta có thể kết luận gì về hàm số F(x)?", a: ["F(x) là hàm đồng biến trên R.", "F(x) là hàm nghịch biến trên R.", "F(x) là hàm hằng.", "F(x) luôn dương trên R."], c: 0 },
-        { q: "Câu 29. Cho hàm số F(x) là một nguyên hàm của f(x) trên K. Nếu f(x) là hàm số lẻ thì F(x) có tính chất gì?", a: ["F(x) là hàm số lẻ.", "F(x) là hàm số chẵn.", "F(x) là hàm số không chẵn, không lẻ.", "Không đủ thông tin để kết luận."], c: 1 },
-        { q: "Câu 30. Xét hai hàm số f(x) = 1/x trên khoảng (0, +∞) và g(x) = 1/x trên khoảng (-∞, 0).", a: ["ln(x) là nguyên hàm của f(x) và ln(-x) là nguyên hàm của g(x).", "ln|x| là nguyên hàm chung cho cả hai trường hợp.", "f(x) có nguyên hàm nhưng g(x) không có nguyên hàm.", "Cả A và B đều đúng."], c: 3 }
-    ];
-
-    const dataChem = [
-        { q: "Câu 1: Este đơn chức X có tỉ khối hơi so với CH4 là 6,25. Cho 20 gam X tác dụng với 300 ml dung dịch KOH 1M. Cô cạn thu được 28 gam chất rắn khan. CTCT của X là:", a: ["CH3-CH2-COO-CH=CH2", "CH2=CH-COO-CH2-CH3", "CH2=CH-CH2-COO-CH3", "CH3-COO-CH=CH-CH3"], c: 3 },
-        { q: "Câu 2: Ứng với công thức C4H8O2 có bao nhiêu este là đồng phân của nhau?", a: ["2", "3", "4", "5"], c: 2 },
-        { q: "Câu 3: Este có mùi dứa là:", a: ["isoamyl axetat", "etyl butirat", "etyl axetat", "geranyl axctat"], c: 1 },
-        { q: "Câu 4: Este X có CTPT C8H8O2. Tác dụng với NaOH thu được sản phẩm có hai muối. Số CTCT của X thỏa mãn là:", a: ["6", "3", "4", "5"], c: 2 },
-        { q: "Câu 5: Đun nóng este HCOOCH3 với một lượng vừa đủ dung dịch NaOH, sản phẩm thu được là:", a: ["CH3COONa và C2H5OH", "HCOONa và CH3OH", "HCOONa và C2H5OH", "CH3COONa và CH3OH"], c: 1 },
-        { q: "Câu 6: Thủy phân X, Y (đồng phân) cần 100ml NaOH 1M, thu được 7,64g muối và 3,76g hỗn hợp ancol Z, T. % khối lượng Z trong P là:", a: ["51%", "49%", "66%", "34%"], c: 3 },
-        { q: "Câu 7: Đốt cháy hoàn toàn muối từ este no, đơn chức X thu được 15,9g Na2CO3, 2,24l CO2 và 6,3g H2O. X là:", a: ["CH3COOH (Lưu ý: X là este)", "C2H5COOCH3", "C3H7COOCH3", "CH3COOC2H5"], c: 3 },
-        { q: "Câu 8: Thủy phân C4H6O2 trong kiềm thu được muối M và chất N đều tráng gương được. CTCT của E là:", a: ["CH3COOCH=CH2", "HCOOCH=CH-CH3", "CH2=CH-COOCH3", "HCOOCH2-CH=CH2"], c: 1 },
-        { q: "Câu 9: Chỉ số xà phòng hóa mẫu chất béo là 208,77 và chỉ số axit là 7. Axit chứa trong chất béo là:", a: ["Axit stearic", "Axit linoleic", "Axit oleic", "Axit panmitic"], c: 3 },
-        { q: "Câu 10: Xà phòng hoá chất nào sau đây thu được glixerol?", a: ["tristearin", "metyl axetat", "metyl fomat", "benzyl axetat"], c: 0 },
-        { q: "Câu 11: Triolein không phản ứng với chất nào sau đây?", a: ["H2 (xt)", "Dung dịch NaOH", "Dung dịch Br2", "Cu(OH)2"], c: 3 },
-        { q: "Câu 12: Xà phòng hóa C10H14O6 thu được glixerol và 3 muối (không đồng phân hình học). CT của 3 muối là:", a: ["CH2=CH-COONa, CH3CH2COONa, HCOONa", "HCOONa, CH≡C-COONa, CH3CH2COONa", "CH2=CH-COONa, HCOONa, CH≡C-COONa", "CH3COONa, HCOONa, CH3CH=CHCOONa"], c: 0 },
-        { q: "Câu 13: Phát biểu nào sau đây là sai?", a: ["Chất béo thường tan trong nước và nhẹ hơn nước", "Fructozơ có nhiều trong mật ong", "Metyl acrylat, tripanmitin là este", "Thủy phân chất béo luôn thu được glixerol"], c: 0 },
-        { q: "Câu 14: Đốt 1 mol chất béo thu được CO2 và H2O hơn kém 6 mol. a mol chất béo tác dụng tối đa 600ml Br2 1M. a là:", a: ["0,20", "0,15", "0,30", "0,18"], c: 1 },
-        { q: "Câu 15: Đốt a mol X (trieste) có b-c=4a. Hidro hóa m gam X cần 0,3 mol H2 thu 39g Y. Giá trị m2 chất rắn là:", a: ["57,2", "52,6", "53,2", "42,6"], c: 1 },
-        { q: "Câu 16: Chất nào sau đây có phân tử khối lớn nhất?", a: ["triolein", "tripanmitin", "tristearin", "trilinolein"], c: 0 },
-        { q: "Câu 17: Số phát biểu đúng: (1) Giặt trong nước cứng (2) Triglixerit + H2 (3) Thủy phân kiềm 1 chiều (4) Phân biệt Gly, HCOOH, Triolein", a: ["1", "2", "3", "4"], c: 2 },
-        { q: "Câu 18: Chất giặt rửa tổng hợp có ưu điểm:", a: ["Dễ kiếm", "Rẻ hơn xà phòng", "Dùng được trong nước cứng", "Hòa tan tốt trong nước"], c: 2 },
-        { q: "Câu 19: Thủy phân X được Y và Z. Oxi hóa Y tạo Z. X không thể là:", a: ["etyl axetat", "etylen glicol oxalat", "vinyl axetat", "isopropyl propionat"], c: 2 },
-        { q: "Câu 20: Chọn khái niệm đúng nhất về chất giặt rửa:", a: ["Sản xuất từ tinh bột", "Làm sạch vết bẩn trên vật rắn", "Làm sạch khi dùng với nước", "Làm sạch vết bẩn mà không gây pứ hóa học với chất đó"], c: 3 },
-        { q: "Câu 21: Đun 4,45 kg tristearin (20% tạp chất) với NaOH. Khối lượng glixerol (kg) là:", a: ["0,46", "0,45", "0,4", "0,3"], c: 2 },
-        { q: "Câu 22: Mỡ chứa 50% olein, 30% panmitin, 20% stearin. Khối lượng xà phòng từ 100kg mỡ là:", a: ["103,26 kg", "73,34 kg", "146,68 kg", "143,41 kg"], c: 0 },
-        { q: "Câu 23: Số phát biểu KHÔNG đúng về Este, Chất béo, Xà phòng, Ancol:", a: ["4", "3", "2", "1"], c: 2 },
-        { q: "Câu 24: Nguyên nhân bồ kết có khả năng giặt rửa:", a: ["Chất khử mạnh", "Este của glixerol", "Chất oxi hóa mạnh", "Cấu tạo đầu phân cực và đuôi không phân cực"], c: 3 },
-        { q: "Câu 25: Đốt 0,9g gluxit X thu 1,32g CO2 và 0,54g H2O. X là:", a: ["glucozơ", "saccarozơ", "tinh bột", "xenlulozơ"], c: 0 },
-        { q: "Câu 26: 50ml glucozơ + AgNO3/NH3 dư -> 2,16g Ag. CM glucozơ là:", a: ["0,20M", "0,01M", "0,02M", "0,1M"], c: 0 },
-        { q: "Câu 27: m gam (Glu + Fruc) + 0,2 mol H2. m gam hh + 0,05 mol Br2. Số mol Glu và Fruc là:", a: ["0,05 và 0,15", "0,05 và 0,35", "0,1 và 0,15", "0,2 và 0,2"], c: 0 },
-        { q: "Câu 28: 27g Glucozo tráng bạc, Ag + HNO3 đặc nóng. Khối lượng dd axit tăng a gam là:", a: ["18,6", "32,4", "16,2", "9,3"], c: 0 },
-        { q: "Câu 29: Phản ứng nào sau đây KHÔNG tạo ra glucozơ:", a: ["Lục hợp HCHO (Ca(OH)2)", "Tam hợp CH3CHO", "Thủy phân mantozơ", "Thủy phân saccarozơ"], c: 1 },
-        { q: "Câu 30: Lượng glucozơ cần tạo 1,82g sobitol (H=80%) là:", a: ["2,25 gam", "1,80 gam", "1,82 gam", "1,44 gam"], c: 0 }
-    ];
-
-    let currentQuestions = [];
-    let currentIdx = 0;
-    let score = 0;
-
-    function openQuiz(type) {
-        if(type === 'nguyen-ham') currentQuestions = dataMath;
-        else currentQuestions = dataChem;
-        
-        currentIdx = 0;
-        score = 0;
-        openModal('modal-quiz');
-        loadQuestion();
-    }
-
-    function loadQuestion() {
-        const qText = document.getElementById('q-text');
-        const ansList = document.getElementById('ans-list');
-        const qTitle = document.getElementById('q-title');
-        const progress = document.getElementById('progress-fill');
-
-        if(currentIdx >= currentQuestions.length) {
-            qTitle.innerText = "HOÀN THÀNH";
-            qText.innerHTML = `<div style="text-align:center">Bạn đã hoàn thành bộ câu hỏi!<br><br>
-                               <span style="font-size:3rem; color:var(--candy-pink)">${score}/${currentQuestions.length}</span><br>câu trả lời đúng</div>`;
-            ansList.innerHTML = `<button class="btn-candy" style="width:100%" onclick="currentIdx=0;score=0;loadQuestion()">Làm lại bài này</button>`;
-            progress.style.width = "100%";
-            return;
-        }
-
-        const data = currentQuestions[currentIdx];
-        qTitle.innerText = `Câu hỏi ${currentIdx + 1} / ${currentQuestions.length}`;
-        qText.innerText = data.q;
-        ansList.innerHTML = "";
-        progress.style.width = `${(currentIdx / currentQuestions.length) * 100}%`;
-
-        data.a.forEach((txt, i) => {
-            const btn = document.createElement('button');
-            btn.className = 'ans-btn';
-            btn.innerHTML = `<span style="color:var(--candy-pink); font-weight:bold">${String.fromCharCode(65 + i)}.</span> ${txt}`;
-            btn.onclick = () => checkAnswer(i, btn);
-            ansList.appendChild(btn);
-        });
-    }
-
-    function checkAnswer(idx, btn) {
-        const correctIdx = currentQuestions[currentIdx].c;
-        const allBtns = document.querySelectorAll('.ans-btn');
-        
-        allBtns.forEach(b => b.style.pointerEvents = 'none');
-
-        if(idx === correctIdx) {
-            btn.style.background = 'var(--success-green)';
-            btn.style.borderColor = 'var(--success-green)';
-            score++;
-        } else {
-            btn.style.background = 'var(--error-red)';
-            btn.style.borderColor = 'var(--error-red)';
-            allBtns[correctIdx].style.background = 'var(--success-green)';
-            allBtns[correctIdx].style.borderColor = 'var(--success-green)';
+        function startQuiz(type) {
+            currentQ = quizData[type];
+            idx = 0; score = 0;
+            document.getElementById('quiz-modal').classList.add('active');
+            showQ();
         }
 
-        setTimeout(() => {
-            currentIdx++;
-            loadQuestion();
-        }, 1500);
-    }
-</script>
+        function closeModal() { document.getElementById('quiz-modal').classList.remove('active'); }
+
+        function showQ() {
+            if(idx >= currentQ.length) {
+                document.getElementById('q-text').innerHTML = `<div style='text-align:center'><h2>Hoàn thành!</h2><p style='font-size:3rem; color:var(--candy-yellow)'>${score}/${currentQ.length}</p></div>`;
+                document.getElementById('ans-container').innerHTML = `<button class='btn-candy' style='width:100%' onclick='closeModal()'>VỀ MENU CHÍNH</button>`;
+                return;
+            }
+            const data = currentQ[idx];
+            document.getElementById('q-count').innerText = `Câu hỏi ${idx+1}/${currentQ.length}`;
+            document.getElementById('q-text').innerHTML = data.q;
+            const container = document.getElementById('ans-container');
+            container.innerHTML = "";
+            
+            data.a.forEach((txt, i) => {
+                const b = document.createElement('button');
+                b.className = "ans-btn";
+                b.innerHTML = txt;
+                b.onclick = () => check(i, b);
+                container.appendChild(b);
+            });
+
+            // Gọi MathJax render lại sau khi thay đổi nội dung HTML
+            MathJax.typeset();
+            document.getElementById('progress').style.width = (idx/currentQ.length*100) + "%";
+        }
+
+        function check(i, btn) {
+            const correct = currentQ[idx].c;
+            const all = document.querySelectorAll('.ans-btn');
+            all.forEach(b => b.style.pointerEvents = 'none');
+            
+            if(i === correct) {
+                btn.classList.add('correct');
+                score++;
+            } else {
+                btn.classList.add('wrong');
+                all[correct].classList.add('correct');
+            }
+            
+            setTimeout(() => { idx++; showQ(); }, 1200);
+        }
+    </script>
 </body>
 </html>
